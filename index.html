@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Javirinart - Portafolio de Arte Digital | Javiera Chávez</title>
+    
+    <meta name="description" content="Portafolio de arte digital de Javiera Chávez (Javivinaart). Ilustraciones únicas, retratos personalizados y arte digital.">
+    <meta name="author" content="Javiera Chávez">
+    
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎨</text></svg>">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJk19QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body data-theme="light"> 
+
+    <header>
+        <h1>Javirinart</h1>
+        <p>Javiera Chávez</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="#hero-section">HOME</a></li>
+            <li><a href="#portfolio-section">COMPOSICIONES</a></li>
+            <li><a href="#process-section">PROCESO</a></li>
+            <li><a href="#acerca-de-mi-section">ACERCA DE MI</a></li>
+            <li><a href="#contact-section">CONTACTO</a></li>
+        </ul>
+        <button id="theme-toggle" class="theme-toggle" aria-label="Cambiar tema">
+            <i class="fas fa-moon"></i>
+        </button>
+    </nav>
+
+    <section id="hero-section" class="hero-section">
+        <canvas id="particles-canvas" class="particles-canvas"></canvas>
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1 class="hero-title">Arte Digital que Inspira</h1>
+                <p class="hero-subtitle">Ilustraciones únicas creadas con pasión y dedicación. Cada obra cuenta una historia.</p>
+                <div class="hero-buttons">
+                    <a href="#portfolio-section" class="btn btn-primary">Ver Mi Trabajo</a>
+                    <a href="#contact-section" class="btn btn-secondary">Comisionar Arte</a>
+                </div>
+            </div>
+            <div class="hero-stats">
+                <div class="stat">
+                    <span class="stat-number">6+</span> <span class="stat-label">Obras Completadas</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">1</span> <span class="stat-label">Año de Experiencia</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">100%</span> <span class="stat-label">Dedicación</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="portfolio-section" class="container"> 
+        <h2>COMPOSICIONES</h2>
+        
+        <div class="gallery-controls">
+            </div>
+        
+        <div class="carousel-container">
+            <button class="carousel-arrow left"><i class="fas fa-chevron-left"></i></button>
+            <div class="carousel-track">
+                <div class="carousel-item active" data-category="paisaje" data-title="paisaje">
+                    <img src="/static/images/dibujo1.jpg" alt="Paisaje de ejemplo">
+                    <div class="carousel-caption">
+                        <h3>Paisaje</h3>
+                        <p>Este paisaje lo hice en media hora...</p>
+                    </div>
+                </div>
+                <div class="carousel-item" data-category="retrato" data-title="estudio pliegues ropa">
+                    <img src="/static/images/dibujo2.jpg" alt="Estudio de pliegues en ropa">
+                    <div class="carousel-caption">
+                        <h3>Estudio de Pliegues</h3>
+                        <p>Aquí estaba practicando los pliegues en la ropa...</p>
+                    </div>
+                </div>
+                <div class="carousel-item" data-category="anime" data-title="nanatsu no taizai anime">
+                    <img src="/static/images/dibujo 3.jpg" alt="Ilustración de Nanatsu no Taizai">
+                    <div class="carousel-caption">
+                        <h3>Nanatsu no Taizai</h3>
+                        <p>Esta ilustración salió porque con mi novia vimos Nanatsu no Taizai.</p>
+                    </div>
+                </div>
+                <div class="carousel-item" data-category="anime" data-title="pokemon eevee celebi">
+                    <img src="/static/images/dibujo 4.jpg" alt="Ilustración de Pokémon Eevee y Celebi">
+                    <div class="carousel-caption">
+                        <h3>Pokémons</h3>
+                        <p>Un regalo para mi novia con sus Pokémons favoritos.</p>
+                    </div>
+                </div>
+                <div class="carousel-item" data-category="referencia" data-title="retrato referencia mascota">
+                    <img src="/static/images/dibujo5.jpg" alt="Retrato de mascota por referencia">
+                    <div class="carousel-caption">
+                        <h3>Retrato por Referencia</h3>
+                        <p>Ejemplo de ilustración a partir de fotos de referencia.</p>
+                    </div>
+                </div>
+                <div class="carousel-item" data-category="referencia" data-title="geisha pinterest referencia">
+                    <img src="/static/images/dibujo6.jpg" alt="Geisha basada en referencia de Pinterest">
+                    <div class="carousel-caption">
+                        <h3>Geisha</h3>
+                        <p>Práctica de referencias de Pinterest.</p>
+                    </div>
+                </div>
+            </div>
+            <button class="carousel-arrow right"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        
+        <div class="carousel-indicators">
+             </div>
+    </section>
+
+    <script src="/static/js/script.js"></script>
+</body>
+</html>
