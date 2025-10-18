@@ -3,15 +3,14 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Javirinart - Portafolio de Arte Digital | Javiera Chávez</title>
+    <title>Javirinart - Portafolio de Arte Digital</title>
     
-    <meta name="description" content="Portafolio de arte digital de Javiera Chávez (Javivinaart). Ilustraciones únicas, retratos personalizados y arte digital.">
+    <meta name="description" content="Portafolio de arte digital de Javiera Chávez (Javivinaart).">
     <meta name="author" content="Javiera Chávez">
     
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎨</text></svg>">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJk19QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    
     <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -20,7 +19,7 @@
 <body data-theme="light"> 
 
     <header>
-        <h1>Javirinart</h1>
+        <h1 class="font-signature">Javirinart</h1> 
         <p>Javiera Chávez</p>
     </header>
 
@@ -49,15 +48,9 @@
                 </div>
             </div>
             <div class="hero-stats">
-                <div class="stat">
-                    <span class="stat-number">6+</span> <span class="stat-label">Obras Completadas</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-number">1</span> <span class="stat-label">Año de Experiencia</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-number">100%</span> <span class="stat-label">Dedicación</span>
-                </div>
+                <div class="stat"><span class="stat-number">6+</span><span class="stat-label">Obras Completadas</span></div>
+                <div class="stat"><span class="stat-number">1</span><span class="stat-label">Año de Experiencia</span></div>
+                <div class="stat"><span class="stat-number">100%</span><span class="stat-label">Dedicación</span></div>
             </div>
         </div>
     </section>
@@ -66,60 +59,87 @@
         <h2>COMPOSICIONES</h2>
         
         <div class="gallery-controls">
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Buscar obras..." class="search-input">
+                <i class="fas fa-search search-icon"></i>
             </div>
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">Todas</button>
+                <button class="filter-btn" data-filter="paisaje">Paisajes</button>
+                <button class="filter-btn" data-filter="retrato">Retratos</button>
+                <button class="filter-btn" data-filter="anime">Anime</button>
+                <button class="filter-btn" data-filter="referencia">Referencias</button>
+            </div>
+        </div>
         
         <div class="carousel-container">
             <button class="carousel-arrow left"><i class="fas fa-chevron-left"></i></button>
             <div class="carousel-track">
-                <div class="carousel-item active" data-category="paisaje" data-title="paisaje">
-                    <img src="/static/images/dibujo1.jpg" alt="Paisaje de ejemplo">
-                    <div class="carousel-caption">
-                        <h3>Paisaje</h3>
-                        <p>Este paisaje lo hice en media hora...</p>
-                    </div>
-                </div>
-                <div class="carousel-item" data-category="retrato" data-title="estudio pliegues ropa">
-                    <img src="/static/images/dibujo2.jpg" alt="Estudio de pliegues en ropa">
-                    <div class="carousel-caption">
-                        <h3>Estudio de Pliegues</h3>
-                        <p>Aquí estaba practicando los pliegues en la ropa...</p>
-                    </div>
-                </div>
-                <div class="carousel-item" data-category="anime" data-title="nanatsu no taizai anime">
-                    <img src="/static/images/dibujo 3.jpg" alt="Ilustración de Nanatsu no Taizai">
-                    <div class="carousel-caption">
-                        <h3>Nanatsu no Taizai</h3>
-                        <p>Esta ilustración salió porque con mi novia vimos Nanatsu no Taizai.</p>
-                    </div>
-                </div>
-                <div class="carousel-item" data-category="anime" data-title="pokemon eevee celebi">
-                    <img src="/static/images/dibujo 4.jpg" alt="Ilustración de Pokémon Eevee y Celebi">
-                    <div class="carousel-caption">
-                        <h3>Pokémons</h3>
-                        <p>Un regalo para mi novia con sus Pokémons favoritos.</p>
-                    </div>
-                </div>
-                <div class="carousel-item" data-category="referencia" data-title="retrato referencia mascota">
-                    <img src="/static/images/dibujo5.jpg" alt="Retrato de mascota por referencia">
-                    <div class="carousel-caption">
-                        <h3>Retrato por Referencia</h3>
-                        <p>Ejemplo de ilustración a partir de fotos de referencia.</p>
-                    </div>
-                </div>
-                <div class="carousel-item" data-category="referencia" data-title="geisha pinterest referencia">
-                    <img src="/static/images/dibujo6.jpg" alt="Geisha basada en referencia de Pinterest">
-                    <div class="carousel-caption">
-                        <h3>Geisha</h3>
-                        <p>Práctica de referencias de Pinterest.</p>
-                    </div>
-                </div>
+                <div class="carousel-item active" data-category="paisaje" data-title="paisaje"><img src="/static/images/dibujo1.jpg" alt="Paisaje"><div class="carousel-caption"><h3>Paisaje</h3><p>Este paisaje lo hice en media hora...</p></div></div>
+                <div class="carousel-item" data-category="retrato" data-title="estudio pliegues ropa"><img src="/static/images/dibujo2.jpg" alt="Estudio de Pliegues"><div class="carousel-caption"><h3>Estudio de Pliegues</h3><p>Aquí estaba practicando los pliegues...</p></div></div>
+                <div class="carousel-item" data-category="anime" data-title="nanatsu no taizai anime"><img src="/static/images/dibujo 3.jpg" alt="Nanatsu no Taizai"><div class="carousel-caption"><h3>Nanatsu no Taizai</h3><p>Ilustración de Nanatsu no Taizai.</p></div></div>
+                <div class="carousel-item" data-category="anime" data-title="pokemon eevee celebi"><img src="/static/images/dibujo 4.jpg" alt="Pokémon"><div class="carousel-caption"><h3>Pokémons</h3><p>Regalo para mi novia de sus Pokémons favoritos.</p></div></div>
+                <div class="carousel-item" data-category="referencia" data-title="retrato referencia mascota"><img src="/static/images/dibujo5.jpg" alt="Retrato por Referencia"><div class="carousel-caption"><h3>Retrato por Referencia</h3><p>Ilustración a partir de una foto.</p></div></div>
+                <div class="carousel-item" data-category="referencia" data-title="geisha pinterest referencia"><img src="/static/images/dibujo6.jpg" alt="Geisha"><div class="carousel-caption"><h3>Geisha</h3><p>Práctica basada en una referencia de Pinterest.</p></div></div>
             </div>
             <button class="carousel-arrow right"><i class="fas fa-chevron-right"></i></button>
         </div>
         
         <div class="carousel-indicators">
-             </div>
+            <span class="indicator active" data-slide="0"></span><span class="indicator" data-slide="1"></span><span class="indicator" data-slide="2"></span><span class="indicator" data-slide="3"></span><span class="indicator" data-slide="4"></span><span class="indicator" data-slide="5"></span>
+        </div>
     </section>
+
+    <section id="process-section" class="process-section">
+        <div class="container">
+            <h2>Mi Proceso de Trabajo</h2>
+            <div class="process-steps">
+                <div class="process-step"><div class="step-icon"><i class="fas fa-lightbulb"></i></div><h3>1. Concepto</h3><p>Desarrollo la idea, busco referencias y creo bocetos.</p></div>
+                <div class="process-step"><div class="step-icon"><i class="fas fa-palette"></i></div><h3>2. Diseño</h3><p>Defino la paleta de colores y la composición.</p></div>
+                <div class="process-step"><div class="step-icon"><i class="fas fa-paint-brush"></i></div><h3>3. Creación</h3><p>Utilizo Krita para dar vida a la ilustración.</p></div>
+                <div class="process-step"><div class="step-icon"><i class="fas fa-magic"></i></div><h3>4. Refinamiento</h3><p>Ajusto luces, sombras y detalles finales.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="acerca-de-mi-section" class="container"> 
+        <h2>ACERCA DE MI</h2>
+        <p>Me llamo Javiera Chávez, tengo 23 años y mi pasión es el arte y la ilustración digital. Desde pequeña dibujo pero retomé de nuevo este hobby hace un año. Sigo en constante aprendizaje y con motivación para sacar lo mejor de mi talento.</p>
+    </section>
+
+    <section id="contact-section" class="contact-section">
+        <div class="container">
+            <h2>¿Interesado en Comisionar Arte?</h2>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <h3>Información de Contacto</h3>
+                    <div class="contact-item"><i class="fab fa-instagram"></i><div><strong>Instagram</strong><p>@javivinaart</p></div></div>
+                    <div class="contact-item"><i class="fas fa-palette"></i><div><strong>Especialidades</strong><p>Retratos, Ilustraciones, Arte Digital</p></div></div>
+                </div>
+                <form class="contact-form form">
+                    <h3>Envíame un Mensaje</h3>
+                    <div class="form-group"><input type="text" name="name" placeholder="Tu nombre" required></div>
+                    <div class="form-group"><input type="email" name="email" placeholder="Tu email" required></div>
+                    <div class="form-group"><textarea name="message" placeholder="Describe tu idea..." rows="4" required></textarea></div>
+                    <button type="submit" class="btn btn-primary">Enviar Mensaje</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <h3>Sígueme en Redes Sociales</h3>
+            <div class="social-icons">
+                <a href="https://www.instagram.com/javirinart/" target="_blank" class="social-link"><i class="fab fa-instagram"></i></a>
+            </div>
+            <p>© 2025 Javirinart - Todos los derechos reservados</p>
+        </div>
+    </footer>
+
+    <div id="imageModal" class="modal"><span class="close">&times;</span><div class="modal-content"><img class="modal-image" id="modalImage" alt=""><div class="modal-caption"><h3 id="modalTitle"></h3><p id="modalDescription"></p></div></div></div>
+    <div id="categoryModal" class="modal"><div class="modal-content"><h3>Agregar Nueva Categoría</h3></div></div>
+    <div id="imageUploadModal" class="modal"><div class="modal-content"><h3>Agregar Nueva Imagen</h3></div></div>
 
     <script src="/static/js/script.js"></script>
 </body>
