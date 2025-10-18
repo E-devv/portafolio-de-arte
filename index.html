@@ -4,22 +4,22 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Javirinart - Portafolio de Arte Digital</title>
-    
+
     <meta name="description" content="Portafolio de arte digital de Javiera Chávez (Javivinaart).">
     <meta name="author" content="Javiera Chávez">
-    
+
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎨</text></svg>">
-    
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJk19QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <link href="/static/css/style.css" rel="stylesheet">
 </head>
-<body data-theme="light"> 
+<body data-theme="light">
 
     <header>
-        <h1 class="font-signature">Javirinart</h1> 
+        <h1 class="font-signature">Javirinart</h1>
         <p>Javiera Chávez</p>
     </header>
 
@@ -55,9 +55,9 @@
         </div>
     </section>
 
-    <section id="portfolio-section" class="container"> 
+    <section id="portfolio-section" class="container">
         <h2>COMPOSICIONES</h2>
-        
+
         <div class="gallery-controls">
             <div class="search-box">
                 <input type="text" id="search-input" placeholder="Buscar obras..." class="search-input">
@@ -69,11 +69,21 @@
                 <button class="filter-btn" data-filter="retrato">Retratos</button>
                 <button class="filter-btn" data-filter="anime">Anime</button>
                 <button class="filter-btn" data-filter="referencia">Referencias</button>
+                <button class="filter-btn add-category-btn" id="add-category-btn" title="Agregar nueva categoría">
+                    <i class="fas fa-plus"></i>
+                    <span>Agregar Categoría</span>
+                </button>
+            </div>
+             <div class="view-toggle">
+                <button id="add-image-btn" class="add-image-btn" title="Agregar nueva imagen">
+                    <i class="fas fa-plus"></i>
+                    <span>Agregar Imagen</span>
+                </button>
             </div>
         </div>
-        
+
         <div class="carousel-container">
-            <button class="carousel-arrow left"><i class="fas fa-chevron-left"></i></button>
+             <button class="carousel-arrow left"><i class="fas fa-chevron-left"></i></button>
             <div class="carousel-track">
                 <div class="carousel-item active" data-category="paisaje" data-title="paisaje"><img src="/static/images/dibujo1.jpg" alt="Paisaje"><div class="carousel-caption"><h3>Paisaje</h3><p>Este paisaje lo hice en media hora...</p></div></div>
                 <div class="carousel-item" data-category="retrato" data-title="estudio pliegues ropa"><img src="/static/images/dibujo2.jpg" alt="Estudio de Pliegues"><div class="carousel-caption"><h3>Estudio de Pliegues</h3><p>Aquí estaba practicando los pliegues...</p></div></div>
@@ -84,7 +94,7 @@
             </div>
             <button class="carousel-arrow right"><i class="fas fa-chevron-right"></i></button>
         </div>
-        
+
         <div class="carousel-indicators">
             <span class="indicator active" data-slide="0"></span><span class="indicator" data-slide="1"></span><span class="indicator" data-slide="2"></span><span class="indicator" data-slide="3"></span><span class="indicator" data-slide="4"></span><span class="indicator" data-slide="5"></span>
         </div>
@@ -102,7 +112,7 @@
         </div>
     </section>
 
-    <section id="acerca-de-mi-section" class="container"> 
+    <section id="acerca-de-mi-section" class="container">
         <h2>ACERCA DE MI</h2>
         <p>Me llamo Javiera Chávez, tengo 23 años y mi pasión es el arte y la ilustración digital. Desde pequeña dibujo pero retomé de nuevo este hobby hace un año. Sigo en constante aprendizaje y con motivación para sacar lo mejor de mi talento.</p>
     </section>
@@ -137,10 +147,76 @@
         </div>
     </footer>
 
-    <div id="imageModal" class="modal"><span class="close">&times;</span><div class="modal-content"><img class="modal-image" id="modalImage" alt=""><div class="modal-caption"><h3 id="modalTitle"></h3><p id="modalDescription"></p></div></div></div>
-    <div id="categoryModal" class="modal"><div class="modal-content"><h3>Agregar Nueva Categoría</h3></div></div>
-    <div id="imageUploadModal" class="modal"><div class="modal-content"><h3>Agregar Nueva Imagen</h3></div></div>
+    <div id="imageModal" class="modal">
+        <span class="close">&times;</span>
+        <div class="modal-content">
+            <img class="modal-image" id="modalImage" alt="">
+            <div class="modal-caption">
+                <h3 id="modalTitle"></h3>
+                <p id="modalDescription"></p>
+            </div>
+        </div>
+    </div>
 
+    <div id="categoryModal" class="modal">
+        <div class="modal-content">
+            <span class="close category-close">&times;</span>
+            <h3>Agregar Nueva Categoría</h3>
+            <form id="category-form">
+                <div class="form-group">
+                    <label for="category-name">Nombre de la categoría:</label>
+                    <input type="text" id="category-name" placeholder="Ej: Ilustraciones, Fanart, etc." required>
+                </div>
+                <div class="form-group">
+                    <label for="category-icon">Icono (opcional):</label>
+                    <select id="category-icon">
+                        <option value="fas fa-palette">🎨 Paleta</option>
+                        <option value="fas fa-star">⭐ Estrella</option>
+                        <option value="fas fa-heart">❤️ Corazón</option>
+                    </select>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="btn btn-secondary" id="cancel-category">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Agregar Categoría</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="imageUploadModal" class="modal">
+        <div class="modal-content">
+            <span class="close image-upload-close">&times;</span>
+            <h3>Agregar Nueva Imagen</h3>
+            <form id="image-upload-form">
+                <div class="form-group">
+                    <label for="image-file">Seleccionar imagen:</label>
+                    <input type="file" id="image-file" accept="image/*" required>
+                    <div class="file-info" id="file-info" style="display: none;">
+                        <p id="file-name"></p>
+                        <p id="file-size"></p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="image-title">Título de la obra:</label>
+                    <input type="text" id="image-title" placeholder="Ej: Mi nueva ilustración" required>
+                </div>
+                <div class="form-group">
+                    <label for="image-description">Descripción:</label>
+                    <textarea id="image-description" placeholder="Cuéntanos sobre esta obra..." rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="image-category">Categoría:</label>
+                    <select id="image-category" required>
+                        <option value="">Selecciona una categoría</option>
+                        </select>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="btn btn-secondary" id="cancel-image">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Agregar Imagen</button>
+                </div>
+            </form>
+        </div>
+    </div>
     <script src="/static/js/script.js"></script>
 </body>
 </html>
