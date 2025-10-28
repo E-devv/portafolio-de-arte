@@ -885,6 +885,139 @@ document.addEventListener('DOMContentLoaded', function() {
      * @function initApp
      * @description Función principal que inicializa todos los módulos de la aplicación.
      */
+    /**
+     * Objeto `feedback`
+     * @description Gestiona la carga y envío de comentarios.
+     */
+    const feedback = {
+        commentsList: document.getElementById('comments-list'),
+        commentForm: document.getElementById('comment-form'),
+
+        /**
+         * @method init
+         * @description Inicializa el sistema de feedback.
+         */
+        init() {
+            if (!this.commentsList || !this.commentForm) {
+                console.warn("Elementos de feedback no encontrados. La funcionalidad de comentarios estará deshabilitada.");
+                return;
+            }
+            this.setupEventListeners();
+            this.loadComments();
+        },
+
+        /**
+         * @method setupEventListeners
+         * @description Configura el listener para el envío del formulario de comentarios.
+         */
+        setupEventListeners() {
+            this.commentForm.addEventListener('submit', (e) => this.handleCommentSubmit(e));
+        },
+
+        /**
+         * @method loadComments
+         * @description Carga los comentarios desde la API y los renderiza en la página.
+         */
+        loadComments() {
+            fetch('/api/comments')
+                .then(response => {
+                    if (!response.ok) throw new Error(`Error HTTP ${response.status} al cargar comentarios.`);
+                    return response.json();
+                })
+                .then(comments => {
+                    this.commentsList.innerHTML = ''; // Limpiar la lista actual
+                    if (comments && comments.length > 0) {
+                        comments.forEach(comment => this.renderComment(comment));
+                    } else {
+                        this.commentsList.innerHTML = '<p>Aún no hay comentarios. ¡Sé el primero en dejar tu opinión!</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error("Error al cargar los comentarios:", error);
+                    this.commentsList.innerHTML = '<p class="error-message">No se pudieron cargar los comentarios. Inténtalo de nuevo más tarde.</p>';
+                });
+        },
+
+        /**
+         * @method renderComment
+         * @description Crea y añade un elemento de comentario al DOM.
+         * @param {object} comment - El objeto del comentario con `author`, `text` y `timestamp`.
+         */
+        renderComment(comment) {
+            const commentElement = document.createElement('div');
+            commentElement.className = 'comment-item';
+
+            const author = document.createElement('strong');
+            author.className = 'comment-author';
+            author.textContent = comment.author;
+
+            const text = document.createElement('p');
+            text.className = 'comment-text';
+            text.textContent = comment.text;
+
+            const timestamp = document.createElement('span');
+            timestamp.className = 'comment-timestamp';
+            timestamp.textContent = new Date(comment.timestamp).toLocaleString('es-ES', {
+                year: 'numeric', month: 'long', day: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            });
+
+            commentElement.appendChild(author);
+            commentElement.appendChild(text);
+            commentElement.appendChild(timestamp);
+
+            // Insertar el nuevo comentario al principio de la lista
+            this.commentsList.insertBefore(commentElement, this.commentsList.firstChild);
+        },
+
+        /**
+         * @method handleCommentSubmit
+         * @description Maneja el envío del formulario de comentarios.
+         * @param {Event} e - El objeto del evento submit.
+         */
+        handleCommentSubmit(e) {
+            e.preventDefault();
+            const authorInput = document.getElementById('comment-author');
+            const textInput = document.getElementById('comment-text');
+
+            const author = authorInput.value.trim();
+            const text = textInput.value.trim();
+
+            if (!author || !text) {
+                alert('Por favor, completa tu nombre y tu comentario.');
+                return;
+            }
+
+            const commentData = { author, text };
+
+            fetch('/api/comments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(commentData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(errorText => {
+                        throw new Error(`Error ${response.status}: ${errorText}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(newComment => {
+                // Si la lista mostraba el mensaje de "no hay comentarios", lo limpia
+                if (this.commentsList.querySelector('p')) {
+                    this.commentsList.innerHTML = '';
+                }
+                this.renderComment(newComment);
+                this.commentForm.reset(); // Limpiar el formulario
+            })
+            .catch(error => {
+                console.error("Error al enviar el comentario:", error);
+                alert(`No se pudo enviar tu comentario: ${error.message}`);
+            });
+        }
+    };
+
     function initApp() {
         carousel.init();
         navigation.init();
@@ -894,8 +1027,9 @@ document.addEventListener('DOMContentLoaded', function() {
         imageUploadModal.init();
         imageModal.init();
         addInitialDeleteListeners();
+        feedback.init(); // Inicializar el módulo de feedback
 
-        console.log("Portafolio inicializado con funcionalidad de eliminar.");
+        console.log("Portafolio inicializado con funcionalidad de eliminar y comentarios.");
     }
 
     initApp();

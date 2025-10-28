@@ -1,18 +1,35 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 )
 
 // uploadPath define la ruta del directorio donde se guardarán las imágenes subidas.
 // Es una constante para asegurar que la ruta sea la misma en todo el programa.
 const uploadPath = "./static/images"
+
+const commentsFilePath = "comments.json"
+
+var (
+	comments   []Comment
+	commentsMu sync.Mutex
+)
+
+// Comment representa la estructura de un comentario.
+type Comment struct {
+	ID        int64  `json:"id"`
+	Author    string `json:"author"`
+	Text      string `json:"text"`
+	Timestamp string `json:"timestamp"`
+}
 
 // main es la función principal que inicia el servidor web.
 // Configura los manejadores de rutas para servir archivos estáticos, la página principal
@@ -25,6 +42,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error al crear la carpeta de subidas '%s': %v", uploadPath, err)
 	}
+
+	// Cargar comentarios desde el archivo al iniciar.
+	loadComments()
 
 	// Configura el servidor de archivos estáticos para servir el contenido de la carpeta "./static".
 	// http.StripPrefix elimina el prefijo "/static/" de la URL para que el servidor de archivos
@@ -52,6 +72,9 @@ func main() {
 	// La función handleImageUpload se encargará de procesar las peticiones a esta ruta.
 	http.HandleFunc("/upload-image", handleImageUpload)
 
+	// Rutas para la API de comentarios
+	http.HandleFunc("/api/comments", handleComments)
+
 	// Inicia el servidor en el puerto 8080.
 	// Si hay un error al iniciar el servidor, el programa termina.
 	port := "8080"
@@ -60,6 +83,99 @@ func main() {
 	if err != nil {
 		log.Fatal("Error al iniciar el servidor: ", err)
 	}
+}
+
+// loadComments carga los comentarios desde el archivo JSON.
+func loadComments() {
+	commentsMu.Lock()
+	defer commentsMu.Unlock()
+
+	file, err := os.ReadFile(commentsFilePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			log.Printf("El archivo de comentarios '%s' no existe. Se creará uno nuevo al guardar el primer comentario.", commentsFilePath)
+			comments = []Comment{}
+			return
+		}
+		log.Fatalf("Error al leer el archivo de comentarios: %v", err)
+	}
+
+	if len(file) == 0 {
+		comments = []Comment{}
+		return
+	}
+
+	err = json.Unmarshal(file, &comments)
+	if err != nil {
+		log.Fatalf("Error al decodificar el archivo de comentarios: %v", err)
+	}
+	log.Printf("Se cargaron %d comentarios.", len(comments))
+}
+
+// saveComments guarda los comentarios en el archivo JSON.
+func saveComments() {
+	commentsMu.Lock()
+	defer commentsMu.Unlock()
+
+	data, err := json.MarshalIndent(comments, "", "  ")
+	if err != nil {
+		log.Printf("Error al codificar comentarios a JSON: %v", err)
+		return
+	}
+
+	err = os.WriteFile(commentsFilePath, data, 0644)
+	if err != nil {
+		log.Printf("Error al guardar comentarios en el archivo: %v", err)
+	}
+}
+
+// handleComments gestiona las peticiones a /api/comments.
+// Soporta GET para obtener comentarios y POST para agregar uno nuevo.
+func handleComments(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		getComments(w, r)
+	case http.MethodPost:
+		addComment(w, r)
+	default:
+		http.Error(w, "Método no permitido", http.StatusMethodNotAllowed)
+	}
+}
+
+// getComments responde con la lista actual de comentarios en formato JSON.
+func getComments(w http.ResponseWriter, r *http.Request) {
+	commentsMu.Lock()
+	defer commentsMu.Unlock()
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(comments)
+}
+
+// addComment procesa una petición para agregar un nuevo comentario.
+func addComment(w http.ResponseWriter, r *http.Request) {
+	var newComment Comment
+	err := json.NewDecoder(r.Body).Decode(&newComment)
+	if err != nil {
+		http.Error(w, "Error al decodificar el cuerpo de la petición: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if newComment.Author == "" || newComment.Text == "" {
+		http.Error(w, "El autor y el texto del comentario no pueden estar vacíos", http.StatusBadRequest)
+		return
+	}
+
+	commentsMu.Lock()
+	newComment.ID = time.Now().UnixNano()
+	newComment.Timestamp = time.Now().Format(time.RFC3339)
+	comments = append(comments, newComment)
+	commentsMu.Unlock()
+
+	go saveComments()
+
+	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(newComment)
 }
 
 // handleImageUpload gestiona la subida de imágenes enviadas desde el formulario del frontend.
