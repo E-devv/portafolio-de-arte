@@ -1028,6 +1028,108 @@ footer p {
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+/* === SECCIÓN DE FEEDBACK/COMENTARIOS === */
+#feedback-section {
+    background-color: var(--color-white);
+    padding: 4rem 1rem;
+}
+
+.feedback-content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+@media (min-width: 992px) {
+    .feedback-content {
+        grid-template-columns: 2fr 1fr; /* La lista de comentarios ocupa más espacio */
+    }
+}
+
+.comments-list {
+    max-height: 500px; /* Altura máxima para la lista */
+    overflow-y: auto; /* Scroll vertical si hay muchos comentarios */
+    padding-right: 1.5rem; /* Espacio para la barra de scroll */
+    border-right: 2px solid var(--color-accent);
+}
+
+/* Estilo para la barra de scroll en navegadores Webkit */
+.comments-list::-webkit-scrollbar {
+    width: 8px;
+}
+.comments-list::-webkit-scrollbar-track {
+    background: var(--color-accent);
+    border-radius: 10px;
+}
+.comments-list::-webkit-scrollbar-thumb {
+    background-color: var(--color-light-blue);
+    border-radius: 10px;
+    border: 2px solid var(--color-accent);
+}
+.comments-list::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-dark-blue);
+}
+
+.comment-item {
+    background: var(--color-white);
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-light);
+    border: 1px solid var(--color-accent);
+    transition: var(--transition-smooth);
+}
+
+.comment-item:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-medium);
+}
+
+.comment-author {
+    display: block;
+    font-weight: 600;
+    color: var(--color-dark-blue);
+    margin-bottom: 0.5rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+}
+
+.comment-text {
+    color: #4A5568;
+    line-height: 1.7;
+    margin-bottom: 1rem;
+}
+
+.comment-timestamp {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--color-light-blue);
+    text-align: right;
+    opacity: 0.8;
+}
+
+.comment-form h3 {
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    color: var(--color-dark-blue);
+}
+
+/* Mensajes de estado en la lista de comentarios */
+.comments-list > p {
+    padding: 2rem;
+    text-align: center;
+    background-color: var(--color-light-yellow);
+    border-radius: 8px;
+    color: var(--color-dark-blue);
+}
+.comments-list .error-message {
+    background-color: #FED7D7; /* Rojo claro */
+    color: #9B2C2C; /* Rojo oscuro */
+}
+
+
 
 /* Diseño responsivo */
 @media (max-width: 768px) {
@@ -1093,6 +1195,19 @@ footer p {
 
     /* Modales */
     .modal-content { width: 95%; margin: 10% auto; padding: 1.5rem; }
+
+    /* Feedback Section */
+    .feedback-content {
+        grid-template-columns: 1fr; /* Apila el contenido */
+    }
+    .comments-list {
+        border-right: none; /* Elimina el borde en móvil */
+        padding-right: 0;
+        max-height: 400px; /* Ajusta la altura máxima para móvil */
+    }
+    .comment-form h3 {
+        text-align: center; /* Centra el título del formulario en móvil */
+    }
 }
 
 @media (max-width: 480px) {
