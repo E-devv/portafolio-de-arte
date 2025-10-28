@@ -10,26 +10,37 @@ import (
 	"time"
 )
 
-// Define la ruta donde se guardarán las imágenes subidas
+// uploadPath define la ruta del directorio donde se guardarán las imágenes subidas.
+// Es una constante para asegurar que la ruta sea la misma en todo el programa.
 const uploadPath = "./static/images"
 
+// main es la función principal que inicia el servidor web.
+// Configura los manejadores de rutas para servir archivos estáticos, la página principal
+// y para procesar la subida de imágenes. Finalmente, inicia el servidor en el puerto 8080.
 func main() {
-	// Asegúrate de que la carpeta de subidas exista
+	// Se asegura de que el directorio de subida de archivos exista.
+	// Si no existe, lo crea con permisos completos.
+	// Si hay un error al crear el directorio, el programa termina.
 	err := os.MkdirAll(uploadPath, os.ModePerm)
 	if err != nil {
 		log.Fatalf("Error al crear la carpeta de subidas '%s': %v", uploadPath, err)
 	}
 
-	// --- Servir archivos estáticos (CSS, JS, imágenes existentes) ---
+	// Configura el servidor de archivos estáticos para servir el contenido de la carpeta "./static".
+	// http.StripPrefix elimina el prefijo "/static/" de la URL para que el servidor de archivos
+	// pueda encontrar los archivos correctamente en el directorio "./static".
 	fs := http.FileServer(http.Dir("./static"))
-	// Hacemos que /static/ sirva archivos desde la carpeta ./static
-	// Hacemos que /images/ también sirva archivos desde ./static/images (para simplificar rutas en HTML)
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
+
+	// Configura un manejador específico para las imágenes subidas.
+	// Esto permite acceder a las imágenes directamente desde "/images/nombre-archivo.jpg" en el HTML,
+	// simplificando las rutas.
 	http.Handle("/images/", http.StripPrefix("/images/", http.FileServer(http.Dir(uploadPath))))
 
-	// --- Servir el archivo principal index.html ---
+	// Configura el manejador para la ruta raíz ("/").
+	// Este manejador sirve el archivo "index.html".
+	// Se realiza una comprobación para evitar que este manejador responda a otras rutas.
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		// Asegúrate de que solo se sirva index.html para la ruta raíz exacta
 		if r.URL.Path != "/" {
 			http.NotFound(w, r)
 			return
@@ -37,10 +48,12 @@ func main() {
 		http.ServeFile(w, r, "index.html")
 	})
 
-	// --- NUEVO: Manejador para la subida de imágenes ---
+	// Configura el manejador para la subida de imágenes en la ruta "/upload-image".
+	// La función handleImageUpload se encargará de procesar las peticiones a esta ruta.
 	http.HandleFunc("/upload-image", handleImageUpload)
 
-	// --- Iniciar el servidor ---
+	// Inicia el servidor en el puerto 8080.
+	// Si hay un error al iniciar el servidor, el programa termina.
 	port := "8080"
 	log.Printf("Servidor iniciado. Abre http://localhost:%s en tu navegador.", port)
 	err = http.ListenAndServe(":"+port, nil)
@@ -49,16 +62,24 @@ func main() {
 	}
 }
 
-// handleImageUpload procesa la subida de archivos desde el modal
+// handleImageUpload gestiona la subida de imágenes enviadas desde el formulario del frontend.
+// Se encarga de validar la petición, parsear el formulario, guardar el archivo en el servidor
+// con un nombre único y responder al cliente.
+//
+// Parámetros:
+//   w http.ResponseWriter: El escritor de respuestas HTTP para enviar la respuesta al cliente.
+//   r *http.Request: La petición HTTP recibida, que contiene el formulario con la imagen.
 func handleImageUpload(w http.ResponseWriter, r *http.Request) {
-	// Solo permitir método POST
+	// Se asegura de que el método de la petición sea POST.
+	// La subida de archivos debe realizarse mediante este método.
 	if r.Method != http.MethodPost {
 		http.Error(w, "Método no permitido", http.StatusMethodNotAllowed)
 		return
 	}
 
-	// Parsear el formulario multipart (límite de 10MB para el archivo)
-	// r.ParseMultipartForm necesita un tamaño máximo en memoria antes de escribir a disco
+	// Parsea el formulario multipart, que es el formato utilizado para enviar archivos.
+	// Se establece un límite de 10 MB para el tamaño total de la petición.
+	// r.ParseMultipartForm necesita un tamaño máximo para almacenar en memoria antes de escribir a disco.
 	err := r.ParseMultipartForm(10 << 20) // 10 MB
 	if err != nil {
 		log.Printf("Error al parsear formulario: %v", err)
@@ -66,21 +87,22 @@ func handleImageUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// --- Obtener el archivo de imagen ---
-	file, handler, err := r.FormFile("image-file") // "image-file" debe coincidir con el name del input en HTML
+	// Obtiene el archivo de imagen del formulario. "image-file" es el nombre del campo `input` en el HTML.
+	// Retorna el archivo, información sobre él (handler) y un posible error.
+	file, handler, err := r.FormFile("image-file")
 	if err != nil {
 		log.Printf("Error al obtener el archivo 'image-file': %v", err)
 		http.Error(w, "Error al obtener el archivo: "+err.Error(), http.StatusBadRequest)
 		return
 	}
-	defer file.Close() // Asegúrate de cerrar el archivo
+	defer file.Close() // Se asegura de que el archivo se cierre al final de la función.
 
-	// --- Obtener los otros datos del formulario ---
+	// Obtiene los demás campos de texto del formulario.
 	title := r.FormValue("image-title")
 	description := r.FormValue("image-description")
 	category := r.FormValue("image-category")
 
-	// Validar que los datos no estén vacíos (puedes añadir más validaciones)
+	// Valida que los campos de texto no estén vacíos.
 	if title == "" || description == "" || category == "" {
 		http.Error(w, "Faltan datos (título, descripción o categoría)", http.StatusBadRequest)
 		return
@@ -89,14 +111,13 @@ func handleImageUpload(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Archivo recibido: %s, Tamaño: %d bytes", handler.Filename, handler.Size)
 	log.Printf("Datos recibidos: Título='%s', Descripción='%s', Categoría='%s'", title, description, category)
 
-	// --- Guardar el archivo en el servidor ---
-	// Crear un nombre de archivo único para evitar colisiones
-	// Usaremos timestamp + nombre original (podrías usar UUIDs también)
+	// Crea un nombre de archivo único para evitar sobrescribir archivos existentes.
+	// Se utiliza el timestamp actual en nanosegundos para garantizar la unicidad.
 	ext := filepath.Ext(handler.Filename)
-	uniqueFilename := fmt.Sprintf("%d_%s%s", time.Now().UnixNano(), "upload", ext) // Ejemplo: 1678886400123456789_upload.jpg
+	uniqueFilename := fmt.Sprintf("%d_%s%s", time.Now().UnixNano(), "upload", ext)
 	dstPath := filepath.Join(uploadPath, uniqueFilename)
 
-	// Crear el archivo destino en el servidor
+	// Crea el archivo de destino en el servidor.
 	dst, err := os.Create(dstPath)
 	if err != nil {
 		log.Printf("Error al crear el archivo destino '%s': %v", dstPath, err)
@@ -105,7 +126,7 @@ func handleImageUpload(w http.ResponseWriter, r *http.Request) {
 	}
 	defer dst.Close()
 
-	// Copiar el contenido del archivo subido al archivo destino
+	// Copia el contenido del archivo subido al archivo de destino que se acaba de crear.
 	_, err = io.Copy(dst, file)
 	if err != nil {
 		log.Printf("Error al copiar el contenido del archivo a '%s': %v", dstPath, err)
@@ -115,10 +136,9 @@ func handleImageUpload(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("Archivo guardado exitosamente en: %s", dstPath)
 
-	// --- (Próximo paso: Guardar la información en un JSON) ---
-	// Por ahora, solo respondemos con éxito
-
-	// Enviar respuesta exitosa al frontend (podrías enviar JSON con la nueva ruta de imagen)
+	// Envía una respuesta de éxito al cliente.
+	// El código de estado es 200 OK y el cuerpo contiene un mensaje de confirmación
+	// que incluye el nombre original y el nuevo nombre del archivo.
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, "¡Imagen '%s' subida y guardada como '%s'!", handler.Filename, uniqueFilename)
 }
