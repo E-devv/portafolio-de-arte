@@ -74,7 +74,7 @@
                     <span>Agregar Categoría</span>
                 </button>
             </div>
-             <div class="view-toggle">
+            <div class="view-toggle">
                 <button id="add-image-btn" class="add-image-btn" title="Agregar nueva imagen">
                     <i class="fas fa-plus"></i>
                     <span>Agregar Imagen</span>
@@ -85,12 +85,36 @@
         <div class="carousel-container">
              <button class="carousel-arrow left"><i class="fas fa-chevron-left"></i></button>
             <div class="carousel-track">
-                <div class="carousel-item active" data-category="paisaje" data-title="paisaje"><img src="/static/images/dibujo1.jpg" alt="Paisaje"><div class="carousel-caption"><h3>Paisaje</h3><p>Este paisaje lo hice en media hora...</p></div></div>
-                <div class="carousel-item" data-category="retrato" data-title="estudio pliegues ropa"><img src="/static/images/dibujo2.jpg" alt="Estudio de Pliegues"><div class="carousel-caption"><h3>Estudio de Pliegues</h3><p>Aquí estaba practicando los pliegues...</p></div></div>
-                <div class="carousel-item" data-category="anime" data-title="nanatsu no taizai anime"><img src="/static/images/dibujo 3.jpg" alt="Nanatsu no Taizai"><div class="carousel-caption"><h3>Nanatsu no Taizai</h3><p>Ilustración de Nanatsu no Taizai.</p></div></div>
-                <div class="carousel-item" data-category="anime" data-title="pokemon eevee celebi"><img src="/static/images/dibujo 4.jpg" alt="Pokémon"><div class="carousel-caption"><h3>Pokémons</h3><p>Regalo para mi novia de sus Pokémons favoritos.</p></div></div>
-                <div class="carousel-item" data-category="referencia" data-title="retrato referencia mascota"><img src="/static/images/dibujo5.jpg" alt="Retrato por Referencia"><div class="carousel-caption"><h3>Retrato por Referencia</h3><p>Ilustración a partir de una foto.</p></div></div>
-                <div class="carousel-item" data-category="referencia" data-title="geisha pinterest referencia"><img src="/static/images/dibujo6.jpg" alt="Geisha"><div class="carousel-caption"><h3>Geisha</h3><p>Práctica basada en una referencia de Pinterest.</p></div></div>
+                <div class="carousel-item active" data-category="paisaje" data-title="paisaje" data-filename="dibujo1.jpg">
+                    <img src="/static/images/dibujo1.jpg" alt="Paisaje">
+                    <button class="delete-image-btn" aria-label="Eliminar imagen" title="Eliminar imagen"><i class="fas fa-trash-alt"></i></button>
+                    <div class="carousel-caption"><h3>Paisaje</h3><p>Este paisaje lo hice en media hora...</p></div>
+                </div>
+                <div class="carousel-item" data-category="retrato" data-title="estudio pliegues ropa" data-filename="dibujo2.jpg">
+                    <img src="/static/images/dibujo2.jpg" alt="Estudio de Pliegues">
+                    <button class="delete-image-btn" aria-label="Eliminar imagen" title="Eliminar imagen"><i class="fas fa-trash-alt"></i></button>
+                    <div class="carousel-caption"><h3>Estudio de Pliegues</h3><p>Aquí estaba practicando los pliegues...</p></div>
+                </div>
+                <div class="carousel-item" data-category="anime" data-title="nanatsu no taizai anime" data-filename="dibujo 3.jpg">
+                    <img src="/static/images/dibujo 3.jpg" alt="Nanatsu no Taizai">
+                    <button class="delete-image-btn" aria-label="Eliminar imagen" title="Eliminar imagen"><i class="fas fa-trash-alt"></i></button>
+                    <div class="carousel-caption"><h3>Nanatsu no Taizai</h3><p>Ilustración de Nanatsu no Taizai.</p></div>
+                </div>
+                <div class="carousel-item" data-category="anime" data-title="pokemon eevee celebi" data-filename="dibujo 4.jpg">
+                    <img src="/static/images/dibujo 4.jpg" alt="Pokémon">
+                    <button class="delete-image-btn" aria-label="Eliminar imagen" title="Eliminar imagen"><i class="fas fa-trash-alt"></i></button>
+                    <div class="carousel-caption"><h3>Pokémons</h3><p>Regalo para mi novia de sus Pokémons favoritos.</p></div>
+                </div>
+                <div class="carousel-item" data-category="referencia" data-title="retrato referencia mascota" data-filename="dibujo5.jpg">
+                    <img src="/static/images/dibujo5.jpg" alt="Retrato por Referencia">
+                    <button class="delete-image-btn" aria-label="Eliminar imagen" title="Eliminar imagen"><i class="fas fa-trash-alt"></i></button>
+                    <div class="carousel-caption"><h3>Retrato por Referencia</h3><p>Ilustración a partir de una foto.</p></div>
+                </div>
+                <div class="carousel-item" data-category="referencia" data-title="geisha pinterest referencia" data-filename="dibujo6.jpg">
+                    <img src="/static/images/dibujo6.jpg" alt="Geisha">
+                    <button class="delete-image-btn" aria-label="Eliminar imagen" title="Eliminar imagen"><i class="fas fa-trash-alt"></i></button>
+                    <div class="carousel-caption"><h3>Geisha</h3><p>Práctica basada en una referencia de Pinterest.</p></div>
+                </div>
             </div>
             <button class="carousel-arrow right"><i class="fas fa-chevron-right"></i></button>
         </div>
@@ -147,76 +171,10 @@
         </div>
     </footer>
 
-    <div id="imageModal" class="modal">
-        <span class="close">&times;</span>
-        <div class="modal-content">
-            <img class="modal-image" id="modalImage" alt="">
-            <div class="modal-caption">
-                <h3 id="modalTitle"></h3>
-                <p id="modalDescription"></p>
-            </div>
-        </div>
-    </div>
+    <div id="imageModal" class="modal"><span class="close">&times;</span><div class="modal-content"><img class="modal-image" id="modalImage" alt=""><div class="modal-caption"><h3 id="modalTitle"></h3><p id="modalDescription"></p></div></div></div>
+    <div id="categoryModal" class="modal"><div class="modal-content"><span class="close category-close">&times;</span><h3>Agregar Nueva Categoría</h3><form id="category-form"><div class="form-group"><label for="category-name">Nombre:</label><input type="text" id="category-name" placeholder="Ej: Ilustraciones" required></div><div class="form-group"><label for="category-icon">Icono:</label><select id="category-icon"><option value="fas fa-palette">🎨 Paleta</option><option value="fas fa-star">⭐ Estrella</option><option value="fas fa-heart">❤️ Corazón</option></select></div><div class="modal-buttons"><button type="button" class="btn btn-secondary" id="cancel-category">Cancelar</button><button type="submit" class="btn btn-primary">Agregar</button></div></form></div></div>
+    <div id="imageUploadModal" class="modal"><div class="modal-content"><span class="close image-upload-close">&times;</span><h3>Agregar Nueva Imagen</h3><form id="image-upload-form"><div class="form-group"><label for="image-file">Archivo:</label><input type="file" id="image-file" name="image-file" accept="image/*" required><div class="file-info" id="file-info" style="display: none;"><p id="file-name"></p><p id="file-size"></p></div></div><div class="form-group"><label for="image-title">Título:</label><input type="text" id="image-title" name="image-title" placeholder="Ej: Mi nueva ilustración" required></div><div class="form-group"><label for="image-description">Descripción:</label><textarea id="image-description" name="image-description" placeholder="Sobre esta obra..." rows="3" required></textarea></div><div class="form-group"><label for="image-category">Categoría:</label><select id="image-category" name="image-category" required><option value="">Selecciona...</option></select></div><div class="modal-buttons"><button type="button" class="btn btn-secondary" id="cancel-image">Cancelar</button><button type="submit" class="btn btn-primary">Agregar Imagen</button></div></form></div></div>
 
-    <div id="categoryModal" class="modal">
-        <div class="modal-content">
-            <span class="close category-close">&times;</span>
-            <h3>Agregar Nueva Categoría</h3>
-            <form id="category-form">
-                <div class="form-group">
-                    <label for="category-name">Nombre de la categoría:</label>
-                    <input type="text" id="category-name" placeholder="Ej: Ilustraciones, Fanart, etc." required>
-                </div>
-                <div class="form-group">
-                    <label for="category-icon">Icono (opcional):</label>
-                    <select id="category-icon">
-                        <option value="fas fa-palette">🎨 Paleta</option>
-                        <option value="fas fa-star">⭐ Estrella</option>
-                        <option value="fas fa-heart">❤️ Corazón</option>
-                    </select>
-                </div>
-                <div class="modal-buttons">
-                    <button type="button" class="btn btn-secondary" id="cancel-category">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Agregar Categoría</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div id="imageUploadModal" class="modal">
-        <div class="modal-content">
-            <span class="close image-upload-close">&times;</span>
-            <h3>Agregar Nueva Imagen</h3>
-            <form id="image-upload-form">
-                <div class="form-group">
-                    <label for="image-file">Seleccionar imagen:</label>
-                    <input type="file" id="image-file" accept="image/*" required>
-                    <div class="file-info" id="file-info" style="display: none;">
-                        <p id="file-name"></p>
-                        <p id="file-size"></p>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="image-title">Título de la obra:</label>
-                    <input type="text" id="image-title" placeholder="Ej: Mi nueva ilustración" required>
-                </div>
-                <div class="form-group">
-                    <label for="image-description">Descripción:</label>
-                    <textarea id="image-description" placeholder="Cuéntanos sobre esta obra..." rows="3" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="image-category">Categoría:</label>
-                    <select id="image-category" required>
-                        <option value="">Selecciona una categoría</option>
-                        </select>
-                </div>
-                <div class="modal-buttons">
-                    <button type="button" class="btn btn-secondary" id="cancel-image">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Agregar Imagen</button>
-                </div>
-            </form>
-        </div>
-    </div>
     <script src="/static/js/script.js"></script>
 </body>
 </html>

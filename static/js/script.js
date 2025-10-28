@@ -13,34 +13,46 @@ document.addEventListener('DOMContentLoaded', function() {
         autoPlayDelay: 5000,
 
         init() {
-            if (!this.track || this.items.length === 0) return;
-            this.updateItemsAndIndicators(); // Actualiza la lista inicial
+            if (!this.track) { // Solo necesitamos el track para empezar
+                console.warn("Elemento .carousel-track no encontrado.");
+                return;
+            }
+            this.updateItemsAndIndicators(); // Carga inicial
+            if (this.items.length === 0) {
+                 console.log("No hay items iniciales en el carrusel.");
+                 // Aún así inicializamos listeners por si se añaden luego
+            }
             this.setupEventListeners();
-            this.showSlide(0);
+             if (this.items.length > 0) {
+                this.showSlide(0); // Mostrar el primero si existe
+             }
             this.startAutoPlay();
         },
 
         updateItemsAndIndicators() {
             this.items = document.querySelectorAll('.carousel-item');
-            // Limpiar indicadores existentes
+            this.indicators = []; // Limpiar array de indicadores
+            // Limpiar indicadores existentes en el DOM
             if (this.indicatorsContainer) this.indicatorsContainer.innerHTML = '';
-            // Crear nuevos indicadores
+
+            // Crear nuevos indicadores y asegurar estado inicial de items
             this.items.forEach((item, index) => {
-                // Asegurar estado inicial correcto
                 item.classList.remove('active', 'filtered-out');
                 item.style.display = 'none';
 
-                // Crear indicador si el contenedor existe
                 if (this.indicatorsContainer) {
                     const indicator = document.createElement('span');
                     indicator.className = 'indicator';
                     indicator.dataset.slide = index;
                     indicator.addEventListener('click', () => this.goToSlide(index));
                     this.indicatorsContainer.appendChild(indicator);
+                    this.indicators.push(indicator); // Añadir al array
                 }
             });
-             // Actualizar la lista de indicadores después de crearlos
-             this.indicators = document.querySelectorAll('.indicator');
+             // Si después de actualizar no hay items, resetea el índice
+             if (this.items.length === 0) {
+                 this.currentIndex = -1;
+             }
         },
 
         setupEventListeners() {
@@ -50,35 +62,44 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.track.addEventListener('mouseenter', () => this.stopAutoPlay());
                 this.track.addEventListener('mouseleave', () => this.startAutoPlay());
             }
-            // Los listeners de indicadores se añaden en updateItemsAndIndicators
         },
 
         showSlide(index) {
             const visibleItems = Array.from(this.items).filter(item => !item.classList.contains('filtered-out'));
+
             if (visibleItems.length === 0) {
-                 this.currentIndex = -1; // No hay items visibles
-                 this.updateIndicatorActiveState(); // Asegura que no haya indicadores activos
+                 this.currentIndex = -1;
+                 // Ocultar todos los items (incluso los filtrados) si no hay visibles
+                 this.items.forEach(item => {
+                    item.style.display = 'none';
+                    item.classList.remove('active');
+                 });
+                 this.updateIndicatorActiveState();
                  return;
             }
 
-             // Ajustar índice si el actual no es visible
-             let targetIndex = index;
-             if (index < 0 || index >= this.items.length || this.items[index].classList.contains('filtered-out')) {
-                 // Busca el índice visible más cercano o el primero si no hay cercano
-                 const firstVisible = visibleItems[0];
-                 targetIndex = Array.from(this.items).indexOf(firstVisible);
-             }
+            let targetIndex = index;
+            let targetItem = this.items[targetIndex];
 
+            // Si el índice es inválido o el item está filtrado, busca el primer visible
+            if (targetIndex < 0 || targetIndex >= this.items.length || targetItem?.classList.contains('filtered-out')) {
+                const firstVisibleItem = visibleItems[0];
+                targetIndex = Array.from(this.items).indexOf(firstVisibleItem);
+                targetItem = this.items[targetIndex]; // Reasignar targetItem
+            }
+
+            // Ocultar todos los items (solo afecta a los no filtrados visualmente)
             this.items.forEach(item => {
                 item.classList.remove('active');
-                if (!item.classList.contains('filtered-out')) { // Solo ocultar si no está filtrado
+                if (!item.classList.contains('filtered-out')) {
                      item.style.display = 'none';
                 }
             });
 
-            if (this.items[targetIndex]) {
-                this.items[targetIndex].classList.add('active');
-                this.items[targetIndex].style.display = 'flex'; // Usar flex para centrar
+            // Mostrar el item objetivo si existe
+            if (targetItem) {
+                targetItem.classList.add('active');
+                targetItem.style.display = 'flex';
             }
 
             this.currentIndex = targetIndex;
@@ -88,9 +109,8 @@ document.addEventListener('DOMContentLoaded', function() {
         updateIndicatorActiveState() {
              this.indicators.forEach((indicator, i) => {
                 const item = this.items[i];
-                // Mostrar indicador solo si el item correspondiente es visible (no filtrado)
+                // Mostrar indicador solo si el item correspondiente existe y no está filtrado
                 indicator.style.display = item && !item.classList.contains('filtered-out') ? 'inline-block' : 'none';
-                // Activar el indicador si es el índice actual
                 indicator.classList.toggle('active', i === this.currentIndex);
             });
         },
@@ -98,14 +118,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
         nextSlide() {
             const visibleItems = Array.from(this.items).filter(item => !item.classList.contains('filtered-out'));
-            if (visibleItems.length === 0) return;
+            if (visibleItems.length <= 1) return; // No hay a dónde ir
 
-            let currentVisibleIndex = -1;
-            visibleItems.forEach((item, idx) => {
-                if (Array.from(this.items).indexOf(item) === this.currentIndex) {
-                    currentVisibleIndex = idx;
-                }
-            });
+            let currentVisibleIndex = visibleItems.findIndex(item => Array.from(this.items).indexOf(item) === this.currentIndex);
+             if (currentVisibleIndex === -1 && visibleItems.length > 0) { // Si el actual no era visible, empieza desde el primero
+                 currentVisibleIndex = 0;
+             } else if (visibleItems.length === 0) {
+                 return; // No hay items visibles
+             }
+
 
             const nextVisibleIndex = (currentVisibleIndex + 1) % visibleItems.length;
             const nextItem = visibleItems[nextVisibleIndex];
@@ -115,14 +136,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
         previousSlide() {
             const visibleItems = Array.from(this.items).filter(item => !item.classList.contains('filtered-out'));
-             if (visibleItems.length === 0) return;
+             if (visibleItems.length <= 1) return;
 
-             let currentVisibleIndex = -1;
-             visibleItems.forEach((item, idx) => {
-                 if (Array.from(this.items).indexOf(item) === this.currentIndex) {
-                     currentVisibleIndex = idx;
-                 }
-             });
+             let currentVisibleIndex = visibleItems.findIndex(item => Array.from(this.items).indexOf(item) === this.currentIndex);
+              if (currentVisibleIndex === -1 && visibleItems.length > 0) {
+                 currentVisibleIndex = 0; // Si el actual no era visible, ir al último visible como previo
+                 currentVisibleIndex = visibleItems.length -1;
+             } else if (visibleItems.length === 0) {
+                 return;
+             }
 
             const prevVisibleIndex = (currentVisibleIndex - 1 + visibleItems.length) % visibleItems.length;
             const prevItem = visibleItems[prevVisibleIndex];
@@ -131,21 +153,23 @@ document.addEventListener('DOMContentLoaded', function() {
         },
 
         goToSlide(index) {
-             if (this.items[index] && !this.items[index].classList.contains('filtered-out')) {
+             if (index >= 0 && index < this.items.length && this.items[index] && !this.items[index].classList.contains('filtered-out')) {
                 this.showSlide(index);
              } else {
-                 // Si el slide clickeado está filtrado, no hacer nada o ir al primero visible
-                 console.warn("Intentando ir a un slide filtrado.");
+                 console.warn("Intentando ir a un slide inválido o filtrado.");
              }
         },
 
         startAutoPlay() {
-            this.stopAutoPlay();
-            this.autoPlayInterval = setInterval(() => this.nextSlide(), this.autoPlayDelay);
+            this.stopAutoPlay(); // Asegura que no haya intervalos duplicados
+            if (this.items.length > 1) { // Solo inicia si hay más de una imagen
+               this.autoPlayInterval = setInterval(() => this.nextSlide(), this.autoPlayDelay);
+            }
         },
 
         stopAutoPlay() {
             if (this.autoPlayInterval) clearInterval(this.autoPlayInterval);
+            this.autoPlayInterval = null;
         }
     };
 
@@ -163,7 +187,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     const targetId = this.getAttribute('href');
                     const targetElement = document.querySelector(targetId);
                     if (targetElement) {
-                        targetElement.scrollIntoView({ behavior: 'smooth' });
+                         const offsetTop = targetElement.offsetTop - (document.querySelector('nav')?.offsetHeight || 0); // Ajuste por nav sticky
+                        window.scrollTo({
+                            top: offsetTop,
+                            behavior: 'smooth'
+                        });
                         // Opcional: cerrar menú móvil si existe
                         document.querySelector('nav ul')?.classList.remove('active');
                     }
@@ -174,33 +202,35 @@ document.addEventListener('DOMContentLoaded', function() {
         setupScrollSpy() {
             const sections = document.querySelectorAll('section[id]');
             const navLinks = document.querySelectorAll('nav a');
+            if (navLinks.length === 0 || sections.length === 0) return;
 
             const observerOptions = {
-                 root: null, // relative to document viewport
-                 rootMargin: '-50px 0px -50% 0px', // Adjust top/bottom margins
-                 threshold: 0.1 // Trigger when 10% of the section is visible
+                 root: null,
+                 rootMargin: `-${(document.querySelector('nav')?.offsetHeight || 50) + 10}px 0px -60% 0px`, // Ajusta margen superior por nav, inferior para activar antes
+                 threshold: 0
              };
 
             const observer = new IntersectionObserver(entries => {
-                let lastActiveFound = false; // Flag to activate only the last intersecting section top-down
+                let activeSectionId = null;
+
+                // Encuentra la última sección visible desde arriba
                 entries.forEach(entry => {
-                    const link = document.querySelector(`nav a[href="#${entry.target.id}"]`);
-                    if (entry.isIntersecting && !lastActiveFound) {
-                         navLinks.forEach(lnk => lnk.classList.remove('active'));
-                         if (link) {
-                             link.classList.add('active');
-                             lastActiveFound = true; // Mark as found to prevent lower sections from overriding
-                         }
-                    } else if (link) {
-                         // link.classList.remove('active'); // Only remove if needed, handled by the loop above
+                    if (entry.isIntersecting) {
+                        activeSectionId = entry.target.id;
                     }
                 });
-                 // If scrolled to top, activate HOME
-                 if (window.scrollY < 100) {
-                     navLinks.forEach(lnk => lnk.classList.remove('active'));
-                     const homeLink = document.querySelector('nav a[href="#hero-section"]');
-                     if (homeLink) homeLink.classList.add('active');
+
+                 // Si ninguna está activa (scroll arriba del todo), activa HOME si existe
+                 if (!activeSectionId && window.scrollY < window.innerHeight / 2) {
+                     activeSectionId = 'hero-section';
                  }
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${activeSectionId}`) {
+                        link.classList.add('active');
+                    }
+                });
 
             }, observerOptions);
 
@@ -231,44 +261,61 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         },
         loadTheme() {
-            const savedTheme = localStorage.getItem('theme') || 'light'; // Default to light
-            this.setTheme(savedTheme);
+            const savedTheme = localStorage.getItem('theme');
+            // Preferir tema del sistema si no hay guardado y está disponible
+             const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const defaultTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+            this.setTheme(defaultTheme);
         }
     };
 
      // === FILTROS Y BÚSQUEDA ===
     const galleryFilters = {
-        filterButtons: document.querySelectorAll('.filter-btn:not(.add-category-btn)'),
+        filterButtons: [], // Se actualiza dinámicamente
         searchInput: document.getElementById('search-input'),
-        addCategoryBtn: document.getElementById('add-category-btn'), // Botón para abrir modal de categoría
-        addImageBtn: document.getElementById('add-image-btn'),     // Botón para abrir modal de imagen
-        filterButtonsContainer: document.querySelector('.filter-buttons'), // Contenedor de botones de filtro
+        addCategoryBtn: document.getElementById('add-category-btn'),
+        addImageBtn: document.getElementById('add-image-btn'),
+        filterButtonsContainer: document.querySelector('.filter-buttons'),
         currentFilter: 'all',
 
         init() {
-            this.loadCategories(); // Cargar categorías guardadas al inicio
-            this.setupEventListeners();
-            this.applyFilterAndSearch(); // Aplicar filtro inicial
+            this.loadCategories(); // Carga y añade botones
+            this.setupEventListeners(); // Asigna listeners a TODOS los botones
+            this.applyFilterAndSearch(); // Aplica filtro inicial
         },
 
         setupEventListeners() {
+            // Re-seleccionar TODOS los botones de filtro cada vez
+            this.filterButtons = document.querySelectorAll('.filter-btn:not(.add-category-btn)');
             this.filterButtons.forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    this.currentFilter = e.target.closest('.filter-btn').dataset.filter;
-                    this.applyFilterAndSearch();
-                });
+                // Remover listener antiguo para evitar duplicados
+                const oldListener = btn._filterClickListener;
+                if (oldListener) {
+                    btn.removeEventListener('click', oldListener);
+                }
+                // Añadir el nuevo listener (usando bind)
+                 const newListener = this.handleFilterClick.bind(this);
+                 btn.addEventListener('click', newListener);
+                 btn._filterClickListener = newListener; // Guardar referencia para poder removerlo
             });
+
             if (this.searchInput) {
                  this.searchInput.addEventListener('input', () => this.applyFilterAndSearch());
             }
-             // Listeners para abrir modales se añaden en categoryModal.init y imageUploadModal.init
+        },
+
+        handleFilterClick(e) {
+            const clickedButton = e.target.closest('.filter-btn');
+            if (!clickedButton) return;
+            this.currentFilter = clickedButton.dataset.filter;
+            this.applyFilterAndSearch();
         },
 
         applyFilterAndSearch() {
             const query = this.searchInput ? this.searchInput.value.toLowerCase() : '';
             let hasVisibleItems = false;
 
-             // Actualizar botón activo
+            // Actualizar botón activo
             this.filterButtons.forEach(btn => {
                  btn.classList.toggle('active', btn.dataset.filter === this.currentFilter);
             });
@@ -283,54 +330,46 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 if (filterMatch && searchMatch) {
                     item.classList.remove('filtered-out');
-                    item.style.display = 'none'; // Será 'flex' si es el activo
+                    // No cambiar display aquí, lo hace showSlide
                     hasVisibleItems = true;
                 } else {
                     item.classList.add('filtered-out');
-                    item.style.display = 'none';
+                    item.style.display = 'none'; // Ocultar los filtrados directamente
                     item.classList.remove('active');
                 }
             });
 
-             // Volver a mostrar el primer slide visible si hay alguno
-            if (hasVisibleItems) {
-                 carousel.showSlide(carousel.currentIndex); // Llama a showSlide para manejar la lógica de visibilidad
-            } else {
-                 carousel.showSlide(-1); // Indicar que no hay nada que mostrar
-            }
-            carousel.updateIndicatorActiveState(); // Actualizar indicadores
+            // Re-mostrar slide adecuado
+             if (hasVisibleItems) {
+                // Si el item actual sigue siendo visible, quédate ahí. Si no, ve al primero visible.
+                 const currentItemStillVisible = carousel.items[carousel.currentIndex] && !carousel.items[carousel.currentIndex].classList.contains('filtered-out');
+                 carousel.showSlide(currentItemStillVisible ? carousel.currentIndex : -1); // -1 fuerza a buscar el primero visible
+             } else {
+                 carousel.showSlide(-1); // No hay nada que mostrar
+             }
+             // Ya no es necesario llamar a updateIndicatorActiveState aquí, showSlide lo hace.
         },
 
         addCategoryButton(name, filterValue, iconClass = 'fas fa-tag') {
-            if (!this.filterButtonsContainer || !this.addCategoryBtn) return;
-
-             // Evitar duplicados
-             if (document.querySelector(`.filter-btn[data-filter="${filterValue}"]`)) {
-                 console.warn(`La categoría "${filterValue}" ya existe.`);
-                 return;
-             }
+             if (!this.filterButtonsContainer || !this.addCategoryBtn) return;
+             if (document.querySelector(`.filter-btn[data-filter="${filterValue}"]`)) return; // Ya existe
 
             const newButton = document.createElement('button');
             newButton.className = 'filter-btn';
             newButton.dataset.filter = filterValue;
             newButton.innerHTML = `<i class="${iconClass}"></i> ${name}`;
 
-            newButton.addEventListener('click', (e) => {
-                this.currentFilter = filterValue;
-                this.applyFilterAndSearch();
-            });
-
-             // Insertar antes del botón "+"
             this.filterButtonsContainer.insertBefore(newButton, this.addCategoryBtn);
 
-             // Actualizar la lista de botones para futuros eventos
-            this.filterButtons = document.querySelectorAll('.filter-btn:not(.add-category-btn)');
+            // IMPORTANTE: Volver a configurar los event listeners
+            this.setupEventListeners();
 
-            this.saveCategories(); // Guardar categorías actualizadas
+            this.saveCategories();
         },
 
         saveCategories() {
             const categories = [];
+            // Usa la lista actualizada de botones
             document.querySelectorAll('.filter-btn:not([data-filter="all"]):not(.add-category-btn)').forEach(btn => {
                 categories.push({
                     name: btn.textContent.trim(),
@@ -344,11 +383,26 @@ document.addEventListener('DOMContentLoaded', function() {
         loadCategories() {
             const saved = localStorage.getItem('customCategories');
             if (saved) {
-                const categories = JSON.parse(saved);
-                categories.forEach(cat => this.addCategoryButton(cat.name, cat.filter, cat.icon));
+                try {
+                    const categories = JSON.parse(saved);
+                    if (Array.isArray(categories)) {
+                       categories.forEach(cat => {
+                           // Añadir botón SIN llamar a setupEventListeners dentro del loop
+                           if (!this.filterButtonsContainer || !this.addCategoryBtn) return;
+                           if (document.querySelector(`.filter-btn[data-filter="${cat.filter}"]`)) return;
+                           const newButton = document.createElement('button');
+                           newButton.className = 'filter-btn';
+                           newButton.dataset.filter = cat.filter;
+                           newButton.innerHTML = `<i class="${cat.icon || 'fas fa-tag'}"></i> ${cat.name}`;
+                           this.filterButtonsContainer.insertBefore(newButton, this.addCategoryBtn);
+                       });
+                    }
+                } catch (e) {
+                    console.error("Error al cargar categorías:", e);
+                    localStorage.removeItem('customCategories');
+                }
             }
-             // Actualizar lista de botones después de cargar
-             this.filterButtons = document.querySelectorAll('.filter-btn:not(.add-category-btn)');
+             // setupEventListeners se llamará una vez en init() después de cargar todas
         }
     };
 
@@ -358,16 +412,12 @@ document.addEventListener('DOMContentLoaded', function() {
         form: document.getElementById('category-form'),
         addButton: document.getElementById('add-category-btn'),
         cancelButton: document.getElementById('cancel-category'),
-        closeButton: document.querySelector('#categoryModal .category-close'), // Selector específico
+        closeButton: document.querySelector('#categoryModal .category-close'),
 
         init() {
-            if (!this.modal || !this.form || !this.addButton || !this.cancelButton || !this.closeButton) {
-                console.warn("Elementos del modal de categoría no encontrados.");
-                return;
-            }
+            if (!this.modal || !this.form || !this.addButton || !this.cancelButton || !this.closeButton) return;
             this.setupEventListeners();
         },
-
         setupEventListeners() {
             this.addButton.addEventListener('click', () => this.open());
             this.cancelButton.addEventListener('click', () => this.close());
@@ -375,23 +425,21 @@ document.addEventListener('DOMContentLoaded', function() {
             this.modal.addEventListener('click', (e) => { if (e.target === this.modal) this.close(); });
             this.form.addEventListener('submit', (e) => this.handleSubmit(e));
         },
-
-        open() { this.modal.style.display = 'block'; },
+        open() { this.modal.style.display = 'block'; document.getElementById('category-name')?.focus(); },
         close() { this.modal.style.display = 'none'; this.form.reset(); },
-
         handleSubmit(e) {
             e.preventDefault();
             const nameInput = document.getElementById('category-name');
             const iconSelect = document.getElementById('category-icon');
             const name = nameInput?.value.trim();
             const icon = iconSelect?.value || 'fas fa-tag';
-            const filterValue = name.toLowerCase().replace(/\s+/g, '-'); // Crear valor de filtro
+            const filterValue = name.toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, ''); // filtro seguro
 
             if (!name) { alert('Ingresa un nombre para la categoría.'); return; }
+            if (!filterValue) { alert('Nombre inválido para filtro.'); return;}
 
             galleryFilters.addCategoryButton(name, filterValue, icon);
             this.close();
-            // Actualizar opciones en el modal de imagen
             imageUploadModal.updateCategoryOptions();
         }
     };
@@ -402,19 +450,15 @@ document.addEventListener('DOMContentLoaded', function() {
         form: document.getElementById('image-upload-form'),
         addButton: document.getElementById('add-image-btn'),
         cancelButton: document.getElementById('cancel-image'),
-        closeButton: document.querySelector('#imageUploadModal .image-upload-close'), // Selector específico
+        closeButton: document.querySelector('#imageUploadModal .image-upload-close'),
         fileInput: document.getElementById('image-file'),
         fileInfo: document.getElementById('file-info'),
         categorySelect: document.getElementById('image-category'),
 
         init() {
-            if (!this.modal || !this.form || !this.addButton || !this.cancelButton || !this.closeButton || !this.fileInput || !this.categorySelect) {
-                 console.warn("Elementos del modal de imagen no encontrados.");
-                 return;
-            }
+            if (!this.modal || !this.form || !this.addButton || !this.cancelButton || !this.closeButton || !this.fileInput || !this.categorySelect) return;
             this.setupEventListeners();
         },
-
         setupEventListeners() {
             this.addButton.addEventListener('click', () => this.open());
             this.cancelButton.addEventListener('click', () => this.close());
@@ -423,36 +467,27 @@ document.addEventListener('DOMContentLoaded', function() {
             this.form.addEventListener('submit', (e) => this.handleSubmit(e));
             this.fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
         },
-
         open() {
             this.updateCategoryOptions();
             this.modal.style.display = 'block';
+            document.getElementById('image-title')?.focus();
         },
-
         close() {
             this.modal.style.display = 'none';
             this.form.reset();
             if (this.fileInfo) this.fileInfo.style.display = 'none';
         },
-
         updateCategoryOptions() {
-            // Guardar opción seleccionada si existe
             const selectedValue = this.categorySelect.value;
-            // Limpiar opciones (excepto la primera)
-            while (this.categorySelect.options.length > 1) {
-                this.categorySelect.remove(1);
-            }
-            // Añadir opciones desde los botones de filtro
-             document.querySelectorAll('.filter-btn:not([data-filter="all"]):not(.add-category-btn)').forEach(btn => {
+            while (this.categorySelect.options.length > 1) this.categorySelect.remove(1);
+            document.querySelectorAll('.filter-btn:not([data-filter="all"]):not(.add-category-btn)').forEach(btn => {
                 const option = document.createElement('option');
                 option.value = btn.dataset.filter;
                 option.textContent = btn.textContent.trim();
                 this.categorySelect.appendChild(option);
             });
-             // Restaurar selección si es posible
-             this.categorySelect.value = selectedValue;
+            this.categorySelect.value = selectedValue;
         },
-
         handleFileSelect(e) {
             const file = e.target.files[0];
             const fileNameEl = document.getElementById('file-name');
@@ -461,54 +496,97 @@ document.addEventListener('DOMContentLoaded', function() {
                 fileNameEl.textContent = `Archivo: ${file.name}`;
                 fileSizeEl.textContent = `Tamaño: ${(file.size / 1024 / 1024).toFixed(2)} MB`;
                 this.fileInfo.style.display = 'block';
-                // Añadir validaciones si es necesario
-            } else if(this.fileInfo){
-                this.fileInfo.style.display = 'none';
-            }
+                 if (!file.type.startsWith('image/')) { alert('Archivo no válido.'); e.target.value = ''; this.fileInfo.style.display = 'none'; return; }
+                 if (file.size > 10 * 1024 * 1024) { alert('Archivo muy grande (Máx 10MB).'); e.target.value = ''; this.fileInfo.style.display = 'none'; return; }
+            } else if(this.fileInfo) { this.fileInfo.style.display = 'none'; }
         },
 
+        // --- handleSubmit ACTUALIZADO con fetch ---
         handleSubmit(e) {
             e.preventDefault();
+            const fileInput = document.getElementById('image-file');
             const titleInput = document.getElementById('image-title');
             const descriptionInput = document.getElementById('image-description');
+            const categorySelect = document.getElementById('image-category');
 
-            const file = this.fileInput.files[0];
+            if (!fileInput?.files || fileInput.files.length === 0) { alert('Selecciona imagen.'); return; }
+            const file = fileInput.files[0];
             const title = titleInput?.value.trim();
             const description = descriptionInput?.value.trim();
-            const category = this.categorySelect.value;
+            const category = categorySelect?.value;
+            if (!title || !description || !category) { alert('Completa todos los campos.'); return; }
+            if (!file.type.startsWith('image/')) { alert('Archivo no válido.'); return; }
+            if (file.size > 10 * 1024 * 1024) { alert('Archivo muy grande.'); return; }
 
-            if (!file || !title || !description || !category) {
-                alert('Por favor, completa todos los campos.');
-                return;
-            }
+            const formData = new FormData();
+            formData.append('image-file', file);
+            formData.append('image-title', title);
+            formData.append('image-description', description);
+            formData.append('image-category', category);
 
-            const imageUrl = URL.createObjectURL(file); // URL temporal
-            this.addImageToDOM(imageUrl, title, description, category);
-            this.close();
-            alert('Imagen agregada localmente (no se guarda permanentemente).');
+            // --- Enviar datos al backend usando fetch ---
+            fetch('/upload-image', { method: 'POST', body: formData })
+            .then(response => response.text().then(text => ({ ok: response.ok, status: response.status, text: text })))
+            .then(({ ok, status, text }) => {
+                if (ok) {
+                    console.log('Server response:', text);
+                    // EXTRAER el nuevo filename de la respuesta del servidor (asumiendo que lo devuelve)
+                    // EJEMPLO: si el servidor responde "¡... guardada como '123_upload.jpg'!"
+                    const match = text.match(/guardada como '([^']+)'/);
+                    const newFilename = match ? match[1] : 'nueva_imagen_error.jpg'; // Nombre de respaldo
+
+                    alert('¡Imagen subida!');
+                    const tempImageUrl = URL.createObjectURL(file); // URL temporal para preview
+                    // Pasar el filename real devuelto por el servidor
+                    this.addImageToDOM(tempImageUrl, title, description, category, newFilename);
+                    this.close();
+                } else {
+                    console.error('Server Error:', status, text);
+                    alert(`Error al subir: ${text}`);
+                }
+            })
+            .catch(error => {
+                console.error('Network error:', error);
+                alert('Error de conexión al subir.');
+            });
         },
 
-        addImageToDOM(imageUrl, title, description, category) {
+        // --- addImageToDOM ACTUALIZADO ---
+        addImageToDOM(imageUrl, title, description, category, filename) { // Recibe filename
             if (!carousel.track || !carousel.indicatorsContainer) return;
 
             const newItem = document.createElement('div');
             newItem.className = 'carousel-item';
             newItem.dataset.category = category;
             newItem.dataset.title = title.toLowerCase();
-            newItem.style.display = 'none'; // Oculto inicialmente
+            newItem.dataset.filename = filename; // *** GUARDAR filename REAL ***
+            newItem.style.display = 'none';
             newItem.innerHTML = `
                 <img src="${imageUrl}" alt="${description}">
+                <button class="delete-image-btn" aria-label="Eliminar imagen" title="Eliminar imagen">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
                 <div class="carousel-caption">
                     <h3>${title}</h3>
                     <p>${description}</p>
                 </div>
             `;
+            const newImg = newItem.querySelector('img');
+            if (newImg) newImg.addEventListener('click', () => imageModal.open(newImg));
+
+            const deleteBtn = newItem.querySelector('.delete-image-btn');
+            if (deleteBtn) deleteBtn.addEventListener('click', handleDeleteImageClick); // Asignar handler
+
             carousel.track.appendChild(newItem);
 
-             // Re-inicializar/actualizar carrusel y filtros
-            carousel.updateItemsAndIndicators(); // Actualiza items y crea indicadores
-            galleryFilters.applyFilterAndSearch(); // Reaplica filtros
-            carousel.goToSlide(carousel.items.length - 1); // Ir al nuevo slide
+            carousel.updateItemsAndIndicators();
+            galleryFilters.applyFilterAndSearch(); // Actualizar filtros y vista
+            // Ir al último slide (que ahora es el nuevo)
+             if (carousel.items.length > 0) {
+                carousel.goToSlide(carousel.items.length - 1);
+             }
+
+            imageModal.addClickListenersToImages(); // Actualizar listeners del modal de imagen
         }
     };
 
@@ -518,54 +596,128 @@ document.addEventListener('DOMContentLoaded', function() {
          modalImage: document.getElementById('modalImage'),
          modalTitle: document.getElementById('modalTitle'),
          modalDescription: document.getElementById('modalDescription'),
-         closeBtn: document.querySelector('#imageModal .close'), // Selector específico
+         closeBtn: document.querySelector('#imageModal .close'),
 
          init() {
-             if (!this.modal || !this.modalImage || !this.modalTitle || !this.modalDescription || !this.closeBtn) {
-                 console.warn("Elementos del modal de visualización no encontrados.");
-                 return;
-             }
+             if (!this.modal || !this.modalImage || !this.modalTitle || !this.modalDescription || !this.closeBtn) return;
              this.setupEventListeners();
          },
-
         setupEventListeners() {
              this.closeBtn.addEventListener('click', () => this.close());
              this.modal.addEventListener('click', (e) => { if (e.target === this.modal) this.close(); });
-
-             // Añadir listeners a las imágenes existentes y futuras (delegación podría ser mejor)
-             this.addClickListenersToImages();
+             this.addClickListenersToImages(); // Añadir a imágenes iniciales
          },
-
          addClickListenersToImages() {
-              // Remover listeners antiguos para evitar duplicados si se llama de nuevo
              document.querySelectorAll('.carousel-item img').forEach(img => {
-                 img.removeEventListener('click', this.handleImageClick); // Remover listener anterior si existe
-                 img.addEventListener('click', this.handleImageClick.bind(this)); // Añadir nuevo listener
+                 // Evitar añadir listeners múltiples
+                 if (!img._imageModalListenerAdded) {
+                      img.addEventListener('click', this.handleImageClick.bind(this));
+                      img._imageModalListenerAdded = true;
+                 }
              });
          },
-
-          // Usar una función nombrada para poder removerla
-         handleImageClick(event) {
-             this.open(event.currentTarget);
-         },
-
-
+         handleImageClick(event) { this.open(event.currentTarget); },
          open(imgElement) {
             const item = imgElement.closest('.carousel-item');
             if (!item) return;
-
             this.modalImage.src = imgElement.src;
             this.modalImage.alt = imgElement.alt;
             this.modalTitle.textContent = item.querySelector('h3')?.textContent || 'Sin Título';
-            this.modalDescription.textContent = item.querySelector('p')?.textContent || 'Sin Descripción';
+            this.modalDescription.textContent = item.querySelector('p')?.textContent || '';
             this.modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
          },
-
          close() {
              this.modal.style.display = 'none';
+             document.body.style.overflow = '';
          }
     };
 
+    // --- NUEVA LÓGICA PARA ELIMINAR IMAGEN ---
+    function handleDeleteImageClick(event) {
+        const button = event.currentTarget;
+        const itemToDelete = button.closest('.carousel-item');
+        if (!itemToDelete) return;
+
+        const filename = itemToDelete.dataset.filename;
+        const title = itemToDelete.dataset.title || filename;
+
+        if (!filename) {
+            alert("Error: No se encontró el nombre del archivo para eliminar.");
+            return;
+        }
+
+        if (window.confirm(`¿Eliminar la imagen "${title}"?`)) {
+            // Eliminar visualmente PRIMERO para respuesta rápida
+            removeCarouselItem(itemToDelete);
+
+            // Enviar petición al backend para eliminar el archivo real
+            console.log(`Enviando petición para eliminar: ${filename}`);
+            fetch('/delete-image', { // (Endpoint que crearemos en Go)
+                method: 'POST', // Usaremos POST por simplicidad para enviar JSON
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename: filename })
+            })
+            .then(response => response.json().then(data => ({ ok: response.ok, data }))) // Asume que Go responde JSON { success: bool, message: string }
+            .then(({ ok, data }) => {
+                if (ok && data.success) {
+                    console.log('Imagen eliminada del servidor:', filename);
+                    // alert('Imagen eliminada del servidor.'); // Opcional: Notificación más discreta
+                } else {
+                    console.error('Error al eliminar del servidor:', data.message || 'Error desconocido');
+                    alert('Error al eliminar la imagen del servidor: ' + (data.message || 'Intenta de nuevo'));
+                    // TODO: Considerar restaurar el item visualmente si falla el backend
+                    // (Esto es más complejo, requiere guardar el elemento temporalmente)
+                }
+            })
+            .catch(error => {
+                console.error('Error de red al eliminar:', error);
+                alert('Error de conexión al intentar eliminar la imagen.');
+                // TODO: Restaurar item visualmente
+            });
+        }
+    }
+
+    function removeCarouselItem(itemElement) {
+        if (!itemElement || !carousel.track) return;
+
+        const indexToRemove = Array.from(carousel.items).indexOf(itemElement);
+        if (indexToRemove === -1) return;
+
+        itemElement.remove(); // Eliminar del DOM
+
+        // Recalcular estado interno
+        const wasCurrentIndex = indexToRemove === carousel.currentIndex;
+        const oldLength = carousel.items.length; // Longitud ANTES de actualizar
+
+        carousel.updateItemsAndIndicators(); // Actualiza items, indicadores y sus listeners
+
+        let nextIndexToShow = carousel.currentIndex; // Por defecto, mantener el índice (si algo más se vuelve visible ahí)
+
+        if (carousel.items.length === 0) {
+            nextIndexToShow = -1; // No queda nada
+        } else if (wasCurrentIndex) {
+            // Si eliminamos el actual, intenta ir al mismo índice (ahora es otro item) o al último si era el último
+             nextIndexToShow = Math.min(indexToRemove, carousel.items.length - 1);
+        } else if (indexToRemove < carousel.currentIndex) {
+            // Si eliminamos uno anterior, el índice actual efectivo se reduce en 1
+            nextIndexToShow = carousel.currentIndex -1;
+        }
+         // Si se eliminó uno posterior, el índice actual sigue siendo válido
+
+        carousel.showSlide(nextIndexToShow); // Mostrar el slide correcto
+        galleryFilters.applyFilterAndSearch(); // Asegurar consistencia de filtros/indicadores
+    }
+
+    function addInitialDeleteListeners() {
+        document.querySelectorAll('.delete-image-btn').forEach(button => {
+             // Evitar duplicados si initApp se llama más de una vez
+             if (!button._deleteListenerAdded) {
+                button.addEventListener('click', handleDeleteImageClick);
+                button._deleteListenerAdded = true;
+             }
+        });
+    }
 
     // --- INICIALIZACIÓN GENERAL ---
     function initApp() {
@@ -575,9 +727,10 @@ document.addEventListener('DOMContentLoaded', function() {
         galleryFilters.init();
         categoryModal.init();
         imageUploadModal.init();
-        imageModal.init(); // Inicializar modal de visualización
+        imageModal.init();
+        addInitialDeleteListeners(); // Añadir listeners a botones de eliminar iniciales
 
-        console.log("Portafolio inicializado.");
+        console.log("Portafolio inicializado con funcionalidad de eliminar.");
     }
 
     initApp(); // Ejecutar inicialización

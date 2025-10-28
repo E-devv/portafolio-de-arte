@@ -18,14 +18,86 @@
   --color-dark-blue: #E2E8F0;
   --color-light-blue: #94A3B8;
   --color-yellow: #FDE047;
-  --color-white: #1E293B;
-  --color-light-yellow: #334155;
-  --color-accent: #475569;
+  --color-white: #1E293B; /* Fondo oscuro */
+  --color-light-yellow: #334155; /* Fondo secundario oscuro */
+  --color-accent: #475569; /* Acento oscuro */
   --color-gold: #F59E0B;
   --shadow-light: 0 4px 12px rgba(0,0,0,0.3);
   --shadow-medium: 0 8px 24px rgba(0,0,0,0.25);
   --shadow-glow: 0 0 20px rgba(253,224,71,0.3);
+
+  /* Colores de texto y fondo para modo oscuro */
+  body {
+      background: var(--color-white);
+      color: var(--color-dark-blue); /* Texto claro sobre fondo oscuro */
+  }
+  h1, h2, h3, .hero-title, .stat-label, .process-step p, #acerca-de-mi-section p, .contact-info strong, .contact-item p {
+      color: var(--color-dark-blue); /* Texto principal claro */
+  }
+   .hero-subtitle, .process-step p, .contact-item p {
+       color: var(--color-light-blue); /* Texto secundario un poco más tenue */
+   }
+   header, footer {
+       background: #0F172A; /* Azul muy oscuro para header/footer */
+       color: var(--color-accent);
+   }
+   nav {
+       background: #1E293B; /* Azul oscuro medio para nav */
+   }
+   .carousel-container, .stat, #acerca-de-mi-section, .process-step, .contact-item, .contact-form, .gallery-controls {
+       background: var(--color-light-yellow); /* Fondo secundario oscuro para contenedores */
+       border-color: var(--color-accent);
+   }
+   .carousel-caption {
+       background: rgba(51, 65, 85, 0.9); /* Fondo caption oscuro */
+   }
+   .carousel-caption h3, .carousel-caption p {
+        color: var(--color-dark-blue); /* Texto caption claro */
+   }
+   .filter-btn, .add-category-btn, .add-image-btn, .search-input, .form-group input, .form-group textarea, .form-group select {
+       background: var(--color-white);
+       color: var(--color-dark-blue);
+       border-color: var(--color-accent);
+   }
+    .filter-btn:not(.add-category-btn):not(.add-image-btn):hover,
+    .filter-btn:not(.add-category-btn):not(.add-image-btn).active {
+      background: var(--color-yellow);
+      border-color: var(--color-yellow);
+      color: #1E293B; /* Texto oscuro en botón activo */
+    }
+    .add-category-btn {
+        background: var(--color-light-blue);
+        border-color: var(--color-light-blue);
+        color: var(--color-white);
+    }
+    .add-category-btn:hover {
+        background: var(--color-accent);
+        border-color: var(--color-accent);
+        color: var(--color-white);
+    }
+    .add-image-btn {
+      background: var(--color-yellow);
+      border-color: var(--color-yellow);
+      color: #1E293B; /* Texto oscuro */
+    }
+    .add-image-btn:hover {
+      background: var(--color-gold);
+      border-color: var(--color-gold);
+    }
+    .modal-content {
+        background-color: var(--color-light-yellow);
+    }
+    .modal .close:hover {
+        color: var(--color-yellow);
+    }
+    #imageModal .modal-caption {
+        background: var(--color-light-yellow);
+    }
+     .form-group label {
+         color: var(--color-dark-blue);
+     }
 }
+
 
 /* Reset y estilos base */
 * {
@@ -416,7 +488,6 @@ section {
   transform: translateY(-2px) scale(1.05);
 }
 
-
 /* Carrusel */
 .carousel-container {
   position: relative;
@@ -436,19 +507,22 @@ section {
 }
 
 .carousel-item {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  transition: opacity 0.5s ease-in-out;
-  display: none; /* Controlado por JS */
-  flex-direction: column;
-  align-items: center;
-  justify-content: center; /* Centra contenido verticalmente */
-  padding: 2rem;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    display: none; /* Controlado por JS */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; /* Centra contenido verticalmente */
+    padding: 2rem;
+    /* Added relative positioning for delete button */
+    position: relative;
 }
+
 
 .carousel-item.active {
   opacity: 1;
@@ -541,6 +615,36 @@ section {
 }
 .indicator:hover {
     background-color: rgba(0, 0, 0, 0.4);
+}
+
+/* === ESTILOS BOTÓN ELIMINAR IMAGEN === */
+.delete-image-btn {
+    position: absolute;
+    top: 1rem; /* Espacio desde arriba */
+    right: 1rem; /* Espacio desde la derecha */
+    background-color: rgba(239, 68, 68, 0.8); /* Rojo semitransparente (Tailwind red-500) */
+    color: white;
+    border: none;
+    border-radius: 50%; /* Botón redondo */
+    width: 35px; /* Tamaño del botón */
+    height: 35px;
+    font-size: 1rem; /* Tamaño del icono */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 15; /* Asegura que esté sobre la imagen */
+    opacity: 0; /* Oculto por defecto */
+    transition: opacity 0.3s ease, background-color 0.3s ease;
+}
+
+/* Mostrar botón al pasar el mouse sobre el item */
+.carousel-item:hover .delete-image-btn {
+    opacity: 1;
+}
+
+.delete-image-btn:hover {
+    background-color: rgba(220, 38, 38, 1); /* Rojo más opaco al pasar el mouse (Tailwind red-600) */
 }
 
 
@@ -701,6 +805,13 @@ section {
     margin-bottom: 1.5rem;
 }
 
+.form-group label { /* Estilo para las etiquetas de los modales */
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--color-dark-blue);
+}
+
 .form-group input,
 .form-group textarea,
 .form-group select {
@@ -789,6 +900,7 @@ footer p {
     align-items: center;
     justify-content: center;
     transition: var(--transition-smooth);
+    z-index: 101; /* Encima de nav sticky */
 }
 .theme-toggle:hover {
     background: rgba(255, 255, 255, 0.2);
@@ -864,6 +976,8 @@ footer p {
 /* Ajuste para el botón cerrar del modal de imagen (fondo oscuro) */
 #imageModal .close {
     color: var(--color-white);
+    top: -2.5rem; /* Posicionar fuera del contenido visual */
+    right: 0;
 }
 #imageModal .close:hover {
     color: var(--color-yellow);
@@ -893,6 +1007,8 @@ footer p {
   border: 2px dashed var(--color-accent);
   background: var(--color-light-yellow);
   cursor: pointer;
+  width: 100%;
+  display: block; /* Asegurar que ocupa el ancho */
 }
 #imageUploadModal input[type="file"]:hover {
     border-color: var(--color-yellow);
@@ -904,6 +1020,7 @@ footer p {
   border-radius: 6px;
   font-size: 0.9rem;
 }
+.file-info p { margin: 0.25rem 0; }
 
 /* Animación de entrada para modal */
 @keyframes modalFadeIn {
@@ -921,20 +1038,27 @@ footer p {
 
     /* Navegación Móvil (Ejemplo básico - necesitarías JS para toggle) */
     .nav-responsive { /* Botón hamburguesa (añadir al HTML si se necesita) */
-        display: block; /* Mostrar botón */
-        /* Estilos para el botón... */
+        display: none; /* Ocultar por ahora, añadir si implementas menú hamburguesa */
     }
     nav ul {
-        /* Ocultar menú por defecto y mostrar verticalmente al activar */
-        /* ... (estilos para menú desplegable) ... */
-        gap: 0.5rem;
+        gap: 0.5rem; /* Menos espacio en móvil */
+        flex-wrap: wrap; /* Permitir que envuelva si no cabe */
+        justify-content: center; /* Centrar ítems */
     }
+    nav ul li a {
+        padding: 0.5rem; /* Padding más pequeño */
+    }
+    .theme-toggle {
+        position: static; /* Quitar posicionamiento absoluto */
+        margin-left: 1rem;
+    }
+
 
     /* Hero */
     .hero-title { font-size: 2.5rem; }
     .hero-subtitle { font-size: 1.1rem; }
-    .hero-stats { flex-direction: row; gap: 0.5rem; justify-content: center; }
-    .stat { padding: 1rem; }
+    .hero-stats { flex-direction: row; gap: 0.5rem; justify-content: center; flex-wrap: wrap; }
+    .stat { padding: 1rem; flex-basis: 45%; } /* Dos stats por línea aprox */
     .stat-number { font-size: 1.8rem; }
 
     /* Controles Galería */
@@ -942,22 +1066,33 @@ footer p {
     .search-box { width: 100%; max-width: none; }
 
     /* Carrusel */
-    .carousel-container { min-height: 400px; }
+    .carousel-container { min-height: 400px; margin: 1rem auto; }
     .carousel-track { height: 400px; }
+    .carousel-item { padding: 1rem;}
     .carousel-item img { max-height: 250px; }
     .carousel-arrow { width: 40px; height: 40px; }
     .carousel-arrow.left { left: 10px; }
     .carousel-arrow.right { right: 10px; }
     .carousel-indicators { padding-bottom: 1rem; }
 
+    /* Botón eliminar en móvil */
+    .delete-image-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 0.9rem;
+        top: 0.5rem;
+        right: 0.5rem;
+    }
+
     /* Proceso */
     .process-steps { grid-template-columns: 1fr; } /* Una columna */
 
     /* Contacto */
     .contact-content { gap: 2rem; }
+    .contact-info h3, .contact-form h3 { text-align: center;} /* Centrar títulos en móvil */
 
     /* Modales */
-    .modal-content { width: 95%; margin: 10% auto; }
+    .modal-content { width: 95%; margin: 10% auto; padding: 1.5rem; }
 }
 
 @media (max-width: 480px) {
@@ -970,6 +1105,7 @@ footer p {
     .hero-buttons { flex-direction: column; align-items: center; }
     .btn { width: 80%; justify-content: center; }
     .hero-stats { flex-direction: column; }
+    .stat { flex-basis: auto; } /* Una stat por línea */
 
     /* Controles Galería: Iconos para botones de acción */
     .add-category-btn span,
@@ -989,11 +1125,15 @@ footer p {
         margin: 0; /* Sin margen extra */
         font-size: 1rem; /* Tamaño icono */
     }
+    .filter-btn { font-size: 0.8rem; padding: 0.4rem 0.8rem;} /* Botones de filtro más pequeños */
 
     /* Carrusel */
     .carousel-container { min-height: 350px; }
     .carousel-track { height: 350px; }
     .carousel-item img { max-height: 200px; }
+    .carousel-caption h3 { font-size: 1.1rem;}
+    .carousel-caption p { font-size: 0.9rem;}
+
 
     /* Contacto */
     .contact-form { padding: 1.5rem; }
